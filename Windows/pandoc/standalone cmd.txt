@@ -1,0 +1,2 @@
+pandoc -s input.md -o output.tex
+
