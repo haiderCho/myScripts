@@ -1,6 +1,6 @@
 These scripts Requires **7-Zip** (`7z.exe` in PATH or at `C:\Program Files\7-Zip\7z.exe`).
 
-## MultiArchivePasswordTester.bat  
+## 🔐MultiArchivePasswordTester.bat  
 This batch script tests all passwords from `passwords.txt` on every archive in the folder.
 
 ### Features  
@@ -18,8 +18,21 @@ This batch script tests all passwords from `passwords.txt` on every archive in t
    * `attempts.csv` for results
    * `extracted/` for extracted files
 
+## ✂️SplitZIPArchiver.bat
 
-## ZipAllFolders.bat
+### Usage:  
+1. Run `SplitZIPArchiver.bat`.
+2. Enter:
+   * Source file/folder path
+   * Archive name (no extension)
+   * Split size (e.g., 100M, 700M, 1G)
+   * Output folder path
+3. The script creates a split `.7z` archive in the output folder.
+
+#### Output Example:  
+`archive.7z.001`, `archive.7z.002`, ...
+
+## 💾ZipAllFolders.bat
 
 This batch script compresses **each subfolder** in the current directory into its own `.zip` file.
 
@@ -33,4 +46,4 @@ For every folder (`X`) in the current directory, it creates a `X.zip` archive co
 
 ### Notes  
 * You can change compression level (`-mx=5`) or type (`-tzip`) as needed.
-* Does **not** delete the original folders.
+* Does not delete the original folders.
