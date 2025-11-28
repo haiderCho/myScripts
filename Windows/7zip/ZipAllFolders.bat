@@ -2,8 +2,8 @@
 setlocal enabledelayedexpansion
 
 :: ================================================
-:: Zip All Folders using 7-Zip
-:: Auto-detects 7-Zip installation
+:: Zip All Folders (Enhanced)
+:: Auto-detects 7-Zip, supports Drag & Drop
 :: Author: haiderCho
 :: ================================================
 
@@ -13,121 +13,92 @@ echo   Zip All Folders Script
 echo ================================================
 echo.
 
-:: Try to find 7-Zip in common locations
+:: 1. Setup Logging
+set "LOGFILE=%~dp0zip_log.txt"
+echo [%DATE% %TIME%] Script started > "%LOGFILE%"
+
+:: 2. Find 7-Zip
 set "zip_exe="
-
-:: Check common installation paths
-if exist "C:\Program Files\7-Zip\7z.exe" (
-    set "zip_exe=C:\Program Files\7-Zip\7z.exe"
-)
-
-if exist "C:\Program Files (x86)\7-Zip\7z.exe" (
-    set "zip_exe=C:\Program Files (x86)\7-Zip\7z.exe"
-)
-
-:: Check PATH
+if exist "C:\Program Files\7-Zip\7z.exe" set "zip_exe=C:\Program Files\7-Zip\7z.exe"
+if not defined zip_exe if exist "C:\Program Files (x86)\7-Zip\7z.exe" set "zip_exe=C:\Program Files (x86)\7-Zip\7z.exe"
 if not defined zip_exe (
     where 7z.exe >nul 2>&1
-    if not errorlevel 1 (
-        set "zip_exe=7z.exe"
-    )
+    if not errorlevel 1 set "zip_exe=7z.exe"
 )
 
-:: If not found, error out
 if not defined zip_exe (
-    echo ERROR: 7-Zip not found!
-    echo.
-    echo Please install 7-Zip from: https://www.7-zip.org/
-    echo Or ensure 7z.exe is in your PATH
-    echo.
+    echo [ERROR] 7-Zip not found!
+    echo [ERROR] 7-Zip not found! >> "%LOGFILE%"
     pause
     exit /b 1
 )
+echo Using 7-Zip: "!zip_exe!"
+echo Using 7-Zip: "!zip_exe!" >> "%LOGFILE%"
 
-echo Using 7-Zip: !zip_exe!
-echo.
-
-:: Get compression level
-set "compression_level=5"
-set /p comp_input="Compression level (0-9, default 5): "
-
-if "!comp_input!" neq "" (
-    if !comp_input! geq 0 if !comp_input! leq 9 (
-        set "compression_level=!comp_input!"
+:: 3. Determine Targets (Current Dir or Dragged Items)
+set "targets="
+if "%~1"=="" (
+    :: No arguments, process all folders in current directory
+    echo Mode: Current Directory Scan
+    for /d %%D in (*) do (
+        set "targets=!targets! "%%~fD""
     )
+) else (
+    :: Arguments provided (Drag & Drop)
+    echo Mode: Drag & Drop
+    :args_loop
+    if "%~1"=="" goto :args_done
+    if exist "%~1" (
+        if exist "%~1\" (
+            :: It's a directory
+            set "targets=!targets! "%~1""
+        ) else (
+            echo Skipping file: "%~nx1" (Only folders supported)
+        )
+    )
+    shift
+    goto :args_loop
+    :args_done
 )
 
-echo Using compression level: !compression_level!
-echo.
-
-:: Count folders
-set "folder_count=0"
-for /d %%X in (*) do set /a folder_count+=1
-
-if !folder_count! equ 0 (
-    echo No folders found in current directory
+if "!targets!"=="" (
+    echo No folders to compress.
     pause
     exit /b 0
 )
 
-echo Found !folder_count! folder(s) to compress
+:: 4. Compression Loop
+set "compression_level=5"
 echo.
+set /p "comp_input=Compression level (0-9, default 5): "
+if not "!comp_input!"=="" set "compression_level=!comp_input!"
+echo Using compression level: !compression_level! >> "%LOGFILE%"
 
-:: Compress folders
-set "success_count=0"
-set "error_count=0"
-
-for /d %%X in (*) do (
-    echo Compressing: %%X
+for %%T in (!targets!) do (
+    set "folder_path=%%~fT"
+    set "folder_name=%%~nT"
+    set "parent_dir=%%~dpT"
     
-    "!zip_exe!" a "%%~X.zip" "%%~X\" -tzip -mx=!compression_level!
+    echo.
+    echo Compressing: "!folder_name!"
+    echo [%DATE% %TIME%] Compressing: "!folder_path!" >> "%LOGFILE%"
+    
+    pushd "!parent_dir!"
+    "!zip_exe!" a "!folder_name!.zip" "!folder_name!\" -tzip -mx=!compression_level! >> "%LOGFILE%" 2>&1
     
     if errorlevel 1 (
-        echo   [FAILED] Error compressing %%X
-        set /a error_count+=1
+        echo   [FAILED] Error compressing "!folder_name!"
+        echo   [FAILED] Error compressing "!folder_name!" >> "%LOGFILE%"
     ) else (
-        :: Verify archive
-        "!zip_exe!" t "%%~X.zip" >nul 2>&1
-        if errorlevel 1 (
-            echo   [FAILED] Archive verification failed for %%X
-            del "%%~X.zip" 2>nul
-            set /a error_count+=1
-        ) else (
-            echo   [OK] Created %%~X.zip
-            set /a success_count+=1
-        )
+        echo   [OK] Created "!folder_name!.zip"
+        echo   [OK] Created "!folder_name!.zip" >> "%LOGFILE%"
     )
-    echo.
-)
-
-:: Summary
-echo ================================================
-echo   Compression Summary
-echo ================================================
-echo   Total folders: !folder_count!
-echo   Successful:    !success_count!
-echo   Failed:        !error_count!
-echo ================================================
-echo.
-
-:: Optional: Delete originals
-if !success_count! gtr 0 (
-    set /p delete_orig="Delete successfully compressed folders? (y/N): "
-    if /i "!delete_orig!"=="y" (
-        echo.
-        echo Deleting original folders...
-        for /d %%X in (*) do (
-            if exist "%%~X.zip" (
-                "!zip_exe!" t "%%~X.zip" >nul 2>&1
-                if not errorlevel 1 (
-                    rd /s /q "%%X"
-                    echo   Deleted: %%X
-                )
-            )
-        )
-    )
+    popd
 )
 
 echo.
-echo All operations complete
+echo ================================================
+echo   Operation Complete
+echo ================================================
+echo Log saved to: "%LOGFILE%"
 pause

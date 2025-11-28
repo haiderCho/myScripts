@@ -1,174 +1,205 @@
 @echo off
 setlocal enabledelayedexpansion
 
-REM === Define category folders ===
+:: ================================================
+:: File Sorter
+:: Sorts files into folders based on keywords
+:: Author: haiderCho
+:: ================================================
+
+:: Safety Check: Don't run in system folders
+if /i "%CD%"=="C:\Windows" goto :unsafe
+if /i "%CD%"=="C:\Windows\System32" goto :unsafe
+if /i "%CD%"=="C:\" goto :unsafe
+
+echo Sorting files in: "%CD%"
+echo.
+
+:: Define category folders
 set categories=Brands Software Games Programming AndroidROMs Hardware System Media Folders Misc
 
 for %%c in (%categories%) do (
     if not exist "%%c" mkdir "%%c"
 )
 
-REM === Brands ===
-move "*Amazon.ico" "Brands" >nul
-move "*Aorus*.ico" "Brands" >nul
-move "*Asus*.ico" "Brands" >nul
-move "Blizzard.ico" "Brands" >nul
-move "Bethesda.ico" "Brands" >nul
-move "Battlestate.ico" "Brands" >nul
-move "bocbank.ico" "Brands" >nul
-move "DeviantArt.ico" "Brands" >nul
-move "Envato.ico" "Brands" >nul
-move "Epic.ico" "Brands" >nul
-move "EVGA.ico" "Brands" >nul
-move "Gigabyte*.ico" "Brands" >nul
-move "HiSpark.ico" "Brands" >nul
-move "*Huggingface.ico" "Brands" >nul
-move "*Logitech*.ico" "Brands" >nul
-move "*Lenovo*.ico" "Brands" >nul
-move "*mastodon.ico" "Brands" >nul
-move "*miHoYo.ico" "Brands" >nul
-move "*netease*.ico" "Brands" >nul
-move "*Nexus*.ico" "Brands" >nul
-move "NZXT.ico" "Brands" >nul
-move "obsidian-3.ico" "Brands" >nul
-move "OrangePi.ico" "Brands" >nul
-move "Origin.ico" "Brands" >nul
-move "Redbubble.ico" "Brands" >nul
-move "Redhat.ico" "Brands" >nul
-move "Riot.ico" "Brands" >nul
-move "Rockstar.ico" "Brands" >nul
-move "ROG.ico" "Brands" >nul
-move "*Teamspeak.ico" "Brands" >nul
-move "*tencent*.ico" "Brands" >nul
-move "Tumblr.ico" "Brands" >nul
-move "Ubisoft.ico" "Brands" >nul
-move "Unsplash.ico" "Brands" >nul
-move "*Wacom*.ico" "Brands" >nul
-move "wikipedia.ico" "Brands" >nul
-move "Xbox.ico" "Brands" >nul
-move "Xiaomi*.ico" "Brands" >nul
-move "Youtube.ico" "Brands" >nul
+:: Logging function
+set "LOGFILE=sort_log.txt"
+echo [%DATE% %TIME%] Sorting started > "%LOGFILE%"
 
-REM === Software ===
-move "*Discord*.ico" "Software" >nul
-move "Chrome.ico" "Software" >nul
-move "cobalt.tools.ico" "Software" >nul
-move "comfyui*.ico" "Software" >nul
-move "Dism++.ico" "Software" >nul
-move "dolby.ico" "Software" >nul
-move "Drawing.ico" "Software" >nul
-move "EASYEDA.ico" "Software" >nul
-move "emby.ico" "Software" >nul
-move "emule.ico" "Software" >nul
-move "flux.ico" "Software" >nul
-move "Grafana.ico" "Software" >nul
-move "greenshot.ico" "Software" >nul
-move "handshaker*.ico" "Software" >nul
-move "Image Settings.ico" "Software" >nul
-move "lmstudio.ico" "Software" >nul
-move "marmoset_text.ico" "Software" >nul
-move "mcreator.ico" "Software" >nul
-move "notion.ico" "Software" >nul
-move "Playnite.ico" "Software" >nul
-move "popchat.ico" "Software" >nul
-move "prometheus.ico" "Software" >nul
-move "Quickshare.ico" "Software" >nul
-move "scrcpy.ico" "Software" >nul
-move "scummvm*.ico" "Software" >nul
-move "Steam.ico" "Software" >nul
-move "stex.ico" "Software" >nul
+:: === Brands ===
+call :MoveFiles "*Amazon.ico" "Brands"
+call :MoveFiles "*Aorus*.ico" "Brands"
+call :MoveFiles "*Asus*.ico" "Brands"
+call :MoveFiles "Blizzard.ico" "Brands"
+call :MoveFiles "Bethesda.ico" "Brands"
+call :MoveFiles "Battlestate.ico" "Brands"
+call :MoveFiles "bocbank.ico" "Brands"
+call :MoveFiles "DeviantArt.ico" "Brands"
+call :MoveFiles "Envato.ico" "Brands"
+call :MoveFiles "Epic.ico" "Brands"
+call :MoveFiles "EVGA.ico" "Brands"
+call :MoveFiles "Gigabyte*.ico" "Brands"
+call :MoveFiles "HiSpark.ico" "Brands"
+call :MoveFiles "*Huggingface.ico" "Brands"
+call :MoveFiles "*Logitech*.ico" "Brands"
+call :MoveFiles "*Lenovo*.ico" "Brands"
+call :MoveFiles "*mastodon.ico" "Brands"
+call :MoveFiles "*miHoYo.ico" "Brands"
+call :MoveFiles "*netease*.ico" "Brands"
+call :MoveFiles "*Nexus*.ico" "Brands"
+call :MoveFiles "NZXT.ico" "Brands"
+call :MoveFiles "obsidian-3.ico" "Brands"
+call :MoveFiles "OrangePi.ico" "Brands"
+call :MoveFiles "Origin.ico" "Brands"
+call :MoveFiles "Redbubble.ico" "Brands"
+call :MoveFiles "Redhat.ico" "Brands"
+call :MoveFiles "Riot.ico" "Brands"
+call :MoveFiles "Rockstar.ico" "Brands"
+call :MoveFiles "ROG.ico" "Brands"
+call :MoveFiles "*Teamspeak.ico" "Brands"
+call :MoveFiles "*tencent*.ico" "Brands"
+call :MoveFiles "Tumblr.ico" "Brands"
+call :MoveFiles "Ubisoft.ico" "Brands"
+call :MoveFiles "Unsplash.ico" "Brands"
+call :MoveFiles "*Wacom*.ico" "Brands"
+call :MoveFiles "wikipedia.ico" "Brands"
+call :MoveFiles "Xbox.ico" "Brands"
+call :MoveFiles "Xiaomi*.ico" "Brands"
+call :MoveFiles "Youtube.ico" "Brands"
 
-REM === Games ===
-move "Battle.net.ico" "Games" >nul
-move "dreamcast.ico" "Games" >nul
-move "dosbox_new_01.ico" "Games" >nul
-move "GOG*.ico" "Games" >nul
-move "mame_arcade.ico" "Games" >nul
-move "minecraft*.ico" "Games" >nul
-move "MiniWorld_Main.ico" "Games" >nul
-move "pc_engine*.ico" "Games" >nul
-move "Playstation.ico" "Games" >nul
-move "retroarch.ico" "Games" >nul
-move "sega*.ico" "Games" >nul
-move "snes.ico" "Games" >nul
+:: === Software ===
+call :MoveFiles "*Discord*.ico" "Software"
+call :MoveFiles "Chrome.ico" "Software"
+call :MoveFiles "cobalt.tools.ico" "Software"
+call :MoveFiles "comfyui*.ico" "Software"
+call :MoveFiles "Dism++.ico" "Software"
+call :MoveFiles "dolby.ico" "Software"
+call :MoveFiles "Drawing.ico" "Software"
+call :MoveFiles "EASYEDA.ico" "Software"
+call :MoveFiles "emby.ico" "Software"
+call :MoveFiles "emule.ico" "Software"
+call :MoveFiles "flux.ico" "Software"
+call :MoveFiles "Grafana.ico" "Software"
+call :MoveFiles "greenshot.ico" "Software"
+call :MoveFiles "handshaker*.ico" "Software"
+call :MoveFiles "Image Settings.ico" "Software"
+call :MoveFiles "lmstudio.ico" "Software"
+call :MoveFiles "marmoset_text.ico" "Software"
+call :MoveFiles "mcreator.ico" "Software"
+call :MoveFiles "notion.ico" "Software"
+call :MoveFiles "Playnite.ico" "Software"
+call :MoveFiles "popchat.ico" "Software"
+call :MoveFiles "prometheus.ico" "Software"
+call :MoveFiles "Quickshare.ico" "Software"
+call :MoveFiles "scrcpy.ico" "Software"
+call :MoveFiles "scummvm*.ico" "Software"
+call :MoveFiles "Steam.ico" "Software"
+call :MoveFiles "stex.ico" "Software"
 
-REM === Programming ===
-move "*chip*.ico" "Programming" >nul
-move "concepts*.ico" "Programming" >nul
-move "devto.ico" "Programming" >nul
-move "elixir.ico" "Programming" >nul
-move "gradle.ico" "Programming" >nul
-move "gopher.ico" "Programming" >nul
-move "haskell.ico" "Programming" >nul
-move "ionic.ico" "Programming" >nul
-move "ipsf.ico" "Programming" >nul
-move "jest.ico" "Programming" >nul
-move "langchain.ico" "Programming" >nul
-move "less.ico" "Programming" >nul
-move "lit.ico" "Programming" >nul
-move "nim.ico" "Programming" >nul
-move "nuke.ico" "Programming" >nul
-move "pinia.ico" "Programming" >nul
-move "pnpm.ico" "Programming" >nul
-move "reactivex.ico" "Programming" >nul
-move "svg.ico" "Programming" >nul
-move "vala.ico" "Programming" >nul
-move "zig.ico" "Programming" >nul
+:: === Games ===
+call :MoveFiles "Battle.net.ico" "Games"
+call :MoveFiles "dreamcast.ico" "Games"
+call :MoveFiles "dosbox_new_01.ico" "Games"
+call :MoveFiles "GOG*.ico" "Games"
+call :MoveFiles "mame_arcade.ico" "Games"
+call :MoveFiles "minecraft*.ico" "Games"
+call :MoveFiles "MiniWorld_Main.ico" "Games"
+call :MoveFiles "pc_engine*.ico" "Games"
+call :MoveFiles "Playstation.ico" "Games"
+call :MoveFiles "retroarch.ico" "Games"
+call :MoveFiles "sega*.ico" "Games"
+call :MoveFiles "snes.ico" "Games"
 
-REM === Android ROMs ===
-move "evolutionx*.ico" "AndroidROMs" >nul
-move "evox.ico" "AndroidROMs" >nul
-move "flamegapps.ico" "AndroidROMs" >nul
-move "GSI.ico" "AndroidROMs" >nul
-move "lineageos.ico" "AndroidROMs" >nul
-move "miui.ico" "AndroidROMs" >nul
-move "nikgapps.ico" "AndroidROMs" >nul
-move "nusantara_project.ico" "AndroidROMs" >nul
-move "opengapps.ico" "AndroidROMs" >nul
-move "orangefox.ico" "AndroidROMs" >nul
-move "paradox.ico" "AndroidROMs" >nul
-move "paranoid.ico" "AndroidROMs" >nul
-move "ricedroid.ico" "AndroidROMs" >nul
-move "risingos.ico" "AndroidROMs" >nul
-move "sparkos.ico" "AndroidROMs" >nul
-move "statix.ico" "AndroidROMs" >nul
-move "twrp.ico" "AndroidROMs" >nul
-move "voltageos.ico" "AndroidROMs" >nul
-move "yaap.ico" "AndroidROMs" >nul
+:: === Programming ===
+call :MoveFiles "*chip*.ico" "Programming"
+call :MoveFiles "concepts*.ico" "Programming"
+call :MoveFiles "devto.ico" "Programming"
+call :MoveFiles "elixir.ico" "Programming"
+call :MoveFiles "gradle.ico" "Programming"
+call :MoveFiles "gopher.ico" "Programming"
+call :MoveFiles "haskell.ico" "Programming"
+call :MoveFiles "ionic.ico" "Programming"
+call :MoveFiles "ipsf.ico" "Programming"
+call :MoveFiles "jest.ico" "Programming"
+call :MoveFiles "langchain.ico" "Programming"
+call :MoveFiles "less.ico" "Programming"
+call :MoveFiles "lit.ico" "Programming"
+call :MoveFiles "nim.ico" "Programming"
+call :MoveFiles "nuke.ico" "Programming"
+call :MoveFiles "pinia.ico" "Programming"
+call :MoveFiles "pnpm.ico" "Programming"
+call :MoveFiles "reactivex.ico" "Programming"
+call :MoveFiles "svg.ico" "Programming"
+call :MoveFiles "vala.ico" "Programming"
+call :MoveFiles "zig.ico" "Programming"
 
-REM === Hardware ===
-move "cad.ico" "Hardware" >nul
-move "desktop-computer.ico" "Hardware" >nul
-move "keil4.ico" "Hardware" >nul
-move "keil5.ico" "Hardware" >nul
-move "luckfox.ico" "Hardware" >nul
-move "rasberrypi.ico" "Hardware" >nul
-move "rpi.ico" "Hardware" >nul
-move "stm32.ico" "Hardware" >nul
-move "vhd.ico" "Hardware" >nul
+:: === Android ROMs ===
+call :MoveFiles "evolutionx*.ico" "AndroidROMs"
+call :MoveFiles "evox.ico" "AndroidROMs"
+call :MoveFiles "flamegapps.ico" "AndroidROMs"
+call :MoveFiles "GSI.ico" "AndroidROMs"
+call :MoveFiles "lineageos.ico" "AndroidROMs"
+call :MoveFiles "miui.ico" "AndroidROMs"
+call :MoveFiles "nikgapps.ico" "AndroidROMs"
+call :MoveFiles "nusantara_project.ico" "AndroidROMs"
+call :MoveFiles "opengapps.ico" "AndroidROMs"
+call :MoveFiles "orangefox.ico" "AndroidROMs"
+call :MoveFiles "paradox.ico" "AndroidROMs"
+call :MoveFiles "paranoid.ico" "AndroidROMs"
+call :MoveFiles "ricedroid.ico" "AndroidROMs"
+call :MoveFiles "risingos.ico" "AndroidROMs"
+call :MoveFiles "sparkos.ico" "AndroidROMs"
+call :MoveFiles "statix.ico" "AndroidROMs"
+call :MoveFiles "twrp.ico" "AndroidROMs"
+call :MoveFiles "voltageos.ico" "AndroidROMs"
+call :MoveFiles "yaap.ico" "AndroidROMs"
 
-REM === System ===
-move "Atention Folder.ico" "System" >nul
-move "archive.ico" "System" >nul
-move "cachefile.ico" "System" >nul
-move "Close Folder.ico" "System" >nul
-move "disabled.ico" "System" >nul
-move "hibernate.ico" "System" >nul
-move "lock.ico" "System" >nul
-move "log.ico" "System" >nul
-move "package.ico" "System" >nul
-move "Search Folder.ico" "System" >nul
-move "trash.ico" "System" >nul
-move "Windows 11.ico" "System" >nul
-move "Windows-updated-blocker.ico" "System" >nul
-move "x64.ico" "System" >nul
-move "x86.ico" "System" >nul
+:: === Hardware ===
+call :MoveFiles "cad.ico" "Hardware"
+call :MoveFiles "desktop-computer.ico" "Hardware"
+call :MoveFiles "keil4.ico" "Hardware"
+call :MoveFiles "keil5.ico" "Hardware"
+call :MoveFiles "luckfox.ico" "Hardware"
+call :MoveFiles "rasberrypi.ico" "Hardware"
+call :MoveFiles "rpi.ico" "Hardware"
+call :MoveFiles "stm32.ico" "Hardware"
+call :MoveFiles "vhd.ico" "Hardware"
 
-REM === Folders ===
-move "*Folder*.ico" "Folders" >nul
+:: === System ===
+call :MoveFiles "Atention Folder.ico" "System"
+call :MoveFiles "archive.ico" "System"
+call :MoveFiles "cachefile.ico" "System"
+call :MoveFiles "Close Folder.ico" "System"
+call :MoveFiles "disabled.ico" "System"
+call :MoveFiles "hibernate.ico" "System"
+call :MoveFiles "lock.ico" "System"
+call :MoveFiles "log.ico" "System"
+call :MoveFiles "package.ico" "System"
+call :MoveFiles "Search Folder.ico" "System"
+call :MoveFiles "trash.ico" "System"
+call :MoveFiles "Windows 11.ico" "System"
+call :MoveFiles "Windows-updated-blocker.ico" "System"
+call :MoveFiles "x64.ico" "System"
+call :MoveFiles "x86.ico" "System"
 
-REM === Misc ===
-move "*.ico" "Misc" >nul
+:: === Folders ===
+call :MoveFiles "*Folder*.ico" "Folders"
+
+:: === Misc ===
+call :MoveFiles "*.ico" "Misc"
 
 echo Sorting completed.
+pause
+exit /b
+
+:MoveFiles
+if exist "%~1" (
+    move "%~1" "%~2" >nul
+    echo Moved "%~1" to "%~2"
+    echo Moved "%~1" to "%~2" >> "%LOGFILE%"
+)
+exit /b
+
+:unsafe
+echo [ERROR] Unsafe directory! Do not run this script in system folders.
 pause

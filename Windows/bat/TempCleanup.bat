@@ -12,13 +12,30 @@ echo   Windows Temporary Files Cleanup Utility
 echo ================================================
 echo.
 echo This script will clean:
-echo  1. User Temp folder (%TEMP%)
+echo  1. User Temp folder (%%TEMP%%)
 echo  2. Windows Temp folder (C:\Windows\Temp)
 echo  3. Prefetch folder (C:\Windows\Prefetch)
-echo  4. Browser caches (optional)
+echo  4. Recycle Bin (Optional)
+echo  5. Windows Update Cache (Optional, Admin only)
+echo  6. Browser caches (Optional)
 echo.
 
-:: Confirmation prompt
+:: Check for Admin rights
+net session >nul 2>&1
+if %errorlevel% == 0 (
+    set "IS_ADMIN=1"
+    echo [INFO] Running as Administrator.
+) else (
+    set "IS_ADMIN=0"
+    echo [INFO] Running as User (Some system folders will be skipped).
+)
+echo.
+
+:: Options
+set "DRY_RUN=0"
+set /p "dry_run_choice=Run in Dry-Run mode (simulate only)? (y/N): "
+if /i "%dry_run_choice%"=="y" set "DRY_RUN=1"
+
 set /p confirm="Do you want to continue? (Y/N): "
 if /i not "%confirm%"=="Y" (
     echo Operation cancelled.
@@ -30,115 +47,122 @@ echo.
 echo Starting cleanup...
 echo.
 
-:: Calculate initial sizes (approximate)
-set "total_freed=0"
-
 :: ================================================
 :: 1. Clean User Temp Folder
 :: ================================================
-echo [1/3] Cleaning User Temp folder...
+echo [1/5] Cleaning User Temp folder...
 set "user_temp=%TEMP%"
 
-:: Count files before
-for /f %%A in ('dir /a-d /s /b "%user_temp%" 2^>nul ^| find /c /v ""') do set "before_count=%%A"
-
-:: Delete files (suppress errors for locked files)
-del /s /f /q "%user_temp%\*" 2>nul
-
-:: Delete empty directories
-for /d %%D in ("%user_temp%\*") do (
-    rd /s /q "%%D" 2>nul
+if %DRY_RUN%==1 (
+    echo   [DRY-RUN] Would delete contents of: "%user_temp%"
+) else (
+    del /s /f /q "%user_temp%\*" 2>nul
+    for /d %%D in ("%user_temp%\*") do rd /s /q "%%D" 2>nul
+    echo   Done.
 )
 
-:: Count files after
-for /f %%A in ('dir /a-d /s /b "%user_temp%" 2^>nul ^| find /c /v ""') do set "after_count=%%A"
-
-set /a "cleaned=before_count-after_count"
-echo    Removed approximately %cleaned% files/folders
-echo    (Some files may be locked by running programs)
-
 :: ================================================
-:: 2. Clean Windows Temp Folder (if admin)
+:: 2. Clean Windows Temp Folder (Admin)
 :: ================================================
-echo [2/3] Cleaning Windows Temp folder...
-
-:: Check if running as admin
-net session >nul 2>&1
-if %errorlevel% == 0 (
-    echo    Running with administrator privileges...
-    
-    del /s /f /q "C:\Windows\Temp\*" 2>nul
-    
-    for /d %%D in ("C:\Windows\Temp\*") do (
-        rd /s /q "%%D" 2>nul
+echo [2/5] Cleaning Windows Temp folder...
+if %IS_ADMIN%==1 (
+    if %DRY_RUN%==1 (
+        echo   [DRY-RUN] Would delete contents of: "C:\Windows\Temp"
+    ) else (
+        del /s /f /q "C:\Windows\Temp\*" 2>nul
+        for /d %%D in ("C:\Windows\Temp\*") do rd /s /q "%%D" 2>nul
+        echo   Done.
     )
-    
-    echo    Windows Temp cleaned
 ) else (
-    echo    Skipping (requires administrator privileges)
-    echo    Run as administrator to clean this location
+    echo   Skipping (Requires Admin).
 )
 
 :: ================================================
-:: 3. Clean Prefetch (if admin)
+:: 3. Clean Prefetch (Admin)
 :: ================================================
-echo [3/3] Cleaning Prefetch folder...
-
-net session >nul 2>&1
-if %errorlevel% == 0 (
-    del /f /q "C:\Windows\Prefetch\*" 2>nul
-    echo    Prefetch cleaned
+echo [3/5] Cleaning Prefetch folder...
+if %IS_ADMIN%==1 (
+    if %DRY_RUN%==1 (
+        echo   [DRY-RUN] Would delete contents of: "C:\Windows\Prefetch"
+    ) else (
+        del /f /q "C:\Windows\Prefetch\*" 2>nul
+        echo   Done.
+    )
 ) else (
-    echo    Skipping (requires administrator privileges)
+    echo   Skipping (Requires Admin).
 )
 
 :: ================================================
-:: Optional: Browser Caches
+:: 4. Clean Recycle Bin
 :: ================================================
 echo.
-set /p browser="Clean browser caches? (Y/N): "
-if /i "%browser%"=="Y" (
+set /p "clean_bin=Empty Recycle Bin? (y/N): "
+if /i "%clean_bin%"=="y" (
+    echo [4/5] Emptying Recycle Bin...
+    if %DRY_RUN%==1 (
+        echo   [DRY-RUN] Would empty Recycle Bin.
+    ) else (
+        rd /s /q %systemdrive%\$Recycle.Bin 2>nul
+        echo   Done.
+    )
+) else (
+    echo [4/5] Skipping Recycle Bin.
+)
+
+:: ================================================
+:: 5. Clean Windows Update Cache (Admin)
+:: ================================================
+echo.
+if %IS_ADMIN%==1 (
+    set /p "clean_update=Clean Windows Update Cache (Fixes update issues)? (y/N): "
+    if /i "!clean_update!"=="y" (
+        echo [5/5] Cleaning Windows Update Cache...
+        if %DRY_RUN%==1 (
+            echo   [DRY-RUN] Would stop wuauserv, clean SoftwareDistribution, and restart wuauserv.
+        ) else (
+            net stop wuauserv
+            del /f /s /q %windir%\SoftwareDistribution\*.*
+            net start wuauserv
+            echo   Done.
+        )
+    ) else (
+        echo [5/5] Skipping Windows Update Cache.
+    )
+) else (
+    echo [5/5] Skipping Windows Update Cache (Requires Admin).
+)
+
+:: ================================================
+:: 6. Browser Caches
+:: ================================================
+echo.
+set /p browser="Clean browser caches? (y/N): "
+if /i "%browser%"=="y" (
     echo Cleaning browser caches...
     
     :: Chrome
     if exist "%LOCALAPPDATA%\Google\Chrome\User Data\Default\Cache" (
-        rd /s /q "%LOCALAPPDATA%\Google\Chrome\User Data\Default\Cache" 2>nul
-        echo    Chrome cache cleaned
+        if %DRY_RUN%==1 (
+            echo   [DRY-RUN] Would clean Chrome cache.
+        ) else (
+            rd /s /q "%LOCALAPPDATA%\Google\Chrome\User Data\Default\Cache" 2>nul
+            echo   Chrome cache cleaned.
+        )
     )
     
     :: Edge
     if exist "%LOCALAPPDATA%\Microsoft\Edge\User Data\Default\Cache" (
-        rd /s /q "%LOCALAPPDATA%\Microsoft\Edge\User Data\Default\Cache" 2>nul
-        echo    Edge cache cleaned
-    )
-    
-    :: Firefox
-    if exist "%LOCALAPPDATA%\Mozilla\Firefox\Profiles" (
-        for /d %%D in ("%LOCALAPPDATA%\Mozilla\Firefox\Profiles\*") do (
-            if exist "%%D\cache2" (
-                rd /s /q "%%D\cache2" 2>nul
-            )
+        if %DRY_RUN%==1 (
+            echo   [DRY-RUN] Would clean Edge cache.
+        ) else (
+            rd /s /q "%LOCALAPPDATA%\Microsoft\Edge\User Data\Default\Cache" 2>nul
+            echo   Edge cache cleaned.
         )
-        echo    Firefox cache cleaned
     )
 )
 
-:: ================================================
-:: Summary
-:: ================================================
 echo.
 echo ================================================
 echo   Cleanup Complete!
 echo ================================================
-echo.
-echo NOTE: Some files may not have been deleted because:
-echo  - They are currently in use by running programs
-echo  - They require administrator privileges
-echo  - They are protected system files
-echo.
-echo TIP: For best results:
-echo  - Close all browsers and programs
-echo  - Run this script as Administrator
-echo.
-
 pause
