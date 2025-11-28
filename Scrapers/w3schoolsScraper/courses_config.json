@@ -1,0 +1,72 @@
+{
+  "python": {
+    "base_url": "https://www.w3schools.com/python/",
+    "start_page": "python_intro.asp",
+    "stop_page": "python_ref_overview.asp",
+    "name": "Python",
+    "description": "W3Schools Python Tutorial"
+  },
+  "javascript": {
+    "base_url": "https://www.w3schools.com/js/",
+    "start_page": "js_intro.asp",
+    "stop_page": "js_versions.asp",
+    "name": "JavaScript",
+    "description": "W3Schools JavaScript Tutorial"
+  },
+  "html": {
+    "base_url": "https://www.w3schools.com/html/",
+    "start_page": "html_intro.asp",
+    "stop_page": "html_examples.asp",
+    "name": "HTML",
+    "description": "W3Schools HTML Tutorial"
+  },
+  "css": {
+    "base_url": "https://www.w3schools.com/css/",
+    "start_page": "css_intro.asp",
+    "stop_page": "css_examples.asp",
+    "name": "CSS",
+    "description": "W3Schools CSS Tutorial"
+  },
+  "sql": {
+    "base_url": "https://www.w3schools.com/sql/",
+    "start_page": "sql_intro.asp",
+    "stop_page": "sql_ref_keywords.asp",
+    "name": "SQL",
+    "description": "W3Schools SQL Tutorial"
+  },
+  "php": {
+    "base_url": "https://www.w3schools.com/php/",
+    "start_page": "php_intro.asp",
+    "stop_page": "php_examples.asp",
+    "name": "PHP",
+    "description": "W3Schools PHP Tutorial"
+  },
+  "java": {
+    "base_url": "https://www.w3schools.com/java/",
+    "start_page": "java_intro.asp",
+    "stop_page": "java_examples.asp",
+    "name": "Java",
+    "description": "W3Schools Java Tutorial"
+  },
+  "react": {
+    "base_url": "https://www.w3schools.com/react/",
+    "start_page": "react_intro.asp",
+    "stop_page": "react_examples.asp",
+    "name": "React",
+    "description": "W3Schools React Tutorial"
+  },
+  "bootstrap": {
+    "base_url": "https://www.w3schools.com/bootstrap/",
+    "start_page": "bootstrap_get_started.asp",
+    "stop_page": "bootstrap_examples.asp",
+    "name": "Bootstrap",
+    "description": "W3Schools Bootstrap Tutorial"
+  },
+  "jquery": {
+    "base_url": "https://www.w3schools.com/jquery/",
+    "start_page": "jquery_intro.asp",
+    "stop_page": "jquery_examples.asp",
+    "name": "jQuery",
+    "description": "W3Schools jQuery Tutorial"
+  }
+}
