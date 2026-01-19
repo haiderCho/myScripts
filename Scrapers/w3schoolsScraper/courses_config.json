@@ -68,5 +68,12 @@
     "stop_page": "jquery_examples.asp",
     "name": "jQuery",
     "description": "W3Schools jQuery Tutorial"
+  },
+  "r": {
+    "base_url": "https://www.w3schools.com/r/",
+    "start_page": "r_intro.asp",
+    "stop_page": "r_stat_percentiles.asp",
+    "name": "R",
+    "description": "W3Schools R Tutorial"
   }
 }
